@@ -1,0 +1,18 @@
+@startuml architecture
+ServiceManager o-- Service
+
+abstract class Service {
+-void* handle
++void start()
++~Service()
+}
+class ServiceManager {
++~ServiceManager()
++int LoadService()
++int ReloadService()
++int UnloadService()
++bool listen()
+-std::unordered_map<std::string, Service*> services_
+-std::string pipe_name_
+}
+@enduml
