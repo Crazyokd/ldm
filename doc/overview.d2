@@ -1,0 +1,54 @@
+vars: {
+  d2-config: {
+    layout-engine: elk
+    theme-id: 300
+  }
+}
+
+模块梳理: {
+  grid-columns: 1
+
+  功能模块: {
+    grid-columns: 2
+
+    系统状态上报
+    任务执行管理 (任务执行线程)
+    本地路径计算 (独立线程)
+
+    周期任务 ()
+
+    协议报文解析和组装
+    rpc 通讯(SRP/sros 代理)
+  }
+
+  当前结构: {
+    任务对象
+    执行线程
+    周期请求
+    srp/sros 代理
+  }
+}
+
+调度流程: {
+  调度: {
+    RIOT
+    VDA5050
+    LDM
+  }
+
+  小车: {
+    adapter
+    sros
+    sros.vda5050
+  }
+
+  调度.RIOT -- 小车.sros: {style.stroke-dash: 4}
+  调度.LDM -- 小车.adapter -- 小车.sros: {style.stroke-dash: 4}
+  调度.vda5050 -- 小车.sros.vda5050: {style.stroke-dash: 4}
+}
+
+adapter 基本流程: {
+  启动 -> 监听网络 -> 注册登录 -> 周期上报
+
+  监听网络 -> 接收任务 -> 任务执行检查 -> 进执行线程 -> 任务收尾，检查调整
+}

@@ -1,0 +1,107 @@
+main:
+  # 强制指定设备类型:
+  #   0x0: 由其它配置信息自动匹配类型
+  #   0x1: 顶升
+  #   0x2: 辊筒
+  #   0x8: SMT
+  #
+  #   0x4: 潜伏叉车(暂未适配)
+  #   0x21: 堆高叉车(暂不支持仿真)
+  #   0x30: 全向泊车(暂未适配)
+  device_type: 0x8
+  # 设备子类型，设备类型为SMT时才生效
+  #   0x1: SMT
+  #   0x2: 老化工装
+  #   0x3: 单板料箱
+  #   0x4: RRU
+  #   0x5: 托盘工装
+  #   0x6: 压板隔热罩
+  device_sub_type: 0x2
+
+  # 小车 id
+  main.nickname: "5124"
+  # 小车型号
+  main.vehicle_type: "Oasis-300E"
+  # 车辆类型:
+  #  旋转顶升: 0x6
+  #  辊筒: 0x17
+  #  SMT: 0x90 (暂定)
+  mc.oasis_assemble: 0x6
+
+  # rcs 连接信息
+  network.server_ip: "127.0.0.1"
+  network.server_port: 8988
+  # 本地绑定端口，0 为随机 (进程不挂端口不变)
+  network.local_port: 10001
+
+  # 避障模型参数, 单位m
+  nav.backward_stop_distance: 1.5
+  nav.slow_distance: 2.0
+  nav.slow_width_offset: 0.12
+  nav.stop_distance: 1.5
+  nav.stop_width_offset: 0.03
+
+  # 货架尺寸, 单位mm
+  rack.max_contour_length: 1320
+  rack.max_contour_width: 780
+
+  # 外部路径, 环境相关，可忽略
+  path.error_code:
+    - "config/error_code.csv"
+    - "/sros/cfg/resources/error_code.csv"
+
+  report:             # 上报服务的配置信息
+    enable: false       # 是否启用上报服务
+    deploy:             # 部署相关信息
+      siteId: 'TC06'      # 工厂区域: TC06 (团 C06 栋)
+      warehouseCode: 'T'  # 仓库代码: T
+      sourceName: 'STD'   # 来源系统
+
+    api_info:         # 消息上报的接口认证信息
+      topic: 'T_LEM_MQ'
+      # url: 'https://lemdevice.make.huawei.com:9601/STDMsgReport'
+      url: 'https://10.28.96.101:9601/STDMsgReport'
+      app_id: 'com.huawei.me.rcs.servermanage'
+      app_key: ''
+      verify: False
+
+mock:
+  # 基于 main 修改
+  base: 'main'
+
+  # 本地绑定端口随机
+  network.local_port: 0
+
+  # 虚拟世界中 货架/充电桩 位置信息: (x, y, yaw), 单位: m, deg
+  mock_positions:
+    init_pose:       # 初始小车状态：位置，角度，货架信息
+      map: 'AB'                   # 初始地图编号
+      pose: [0, 0, 0]             # 初始小车位置，角度 (注意当前部分测试用例默认初始座标在原点)
+      #shelf: ['T000000x', 180]   # 带货架：id, 角度；空货架给 null 或者注释掉
+
+    shelf:           # 货架 id: 位置，角度 (放远点，避免影响测试用例)
+      T0000001: [2000022, 0, 0]
+      T0000002: [2000022.22, 1, 90]   # 货架座标 (2000022.22m, 1m), 角度 90 度
+
+    charge_station:  # 充电桩位置(座标，角度)
+      - [1000000, 0, 0]
+
+  # 初始系统硬件状态
+  hw_state:
+    battery_percentage: 0.86    # 剩余电池容量 86%
+
+  report:
+    api_info:
+      topic: 'T_LEM_MQ'
+      url: 'http://127.0.0.1:4097/mock'
+      app_id: 'com.huawei.me.rcs.servermanage'
+      app_key: ''
+
+tweak:            # 性能相关调试参数
+  loop:
+    debug: false  # 事件循环调试开关
+    slow_ms: 10   # 携程执行阻塞的判定时间 ms
+
+  report:
+    workers: 10
+    queue_size: 1000

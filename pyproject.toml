@@ -1,0 +1,140 @@
+[project]
+name = "protocol_adapter"
+description = "ldm protocol adapter"
+requires-python = ">=3.8"
+dynamic = ["version"]
+
+# 依赖管理建议: uv
+dependencies = [
+    "pyyaml>=6.0.2",
+    "protobuf>=5.29.3",
+    "numpy>=1.24.4",
+    "colorlog>=6.9.0",
+    "pydantic>=2.10.6",
+    "httpx>=0.28.1",
+    "fastapi>=0.115.8",
+    "uvicorn>=0.33.0",
+    "uvloop>=0.21.0",
+]
+
+[project.optional-dependencies]
+test = [
+    "matplotlib>=3.7.5",
+    "pytest>=8.3.4",
+    "pytest-mock>=3.14.0",
+    "coverage>=7.6.1",
+]
+
+[dependency-groups]
+dev = [
+    "tenacity>=9.0.0",
+    "grpcio-tools>=1.70.0",
+    "hatchling>=1.27.0",
+    "nuitka>=2.6.3",
+    "ruff>=0.9.4",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.metadata.hooks.custom]
+path = "hatch_build.py"
+
+[tool.hatch.build.hooks.custom]
+path = "hatch_build.py"
+
+# vars passed to hatch_build.py
+[tool.hatch.build.hooks.custom.autogen]
+version_py = "protocol_adapter/version.py"
+proto_dir = "../core/proto/"
+proto_files = ["monitor.proto", "main.proto"]
+proto_out_dir = "protocol_adapter/protobuf_wrapper/"
+
+[tool.hatch.build.hooks.custom.nuitka]
+args = [	# args passed to nuitka, to debug the binary, append arg: --unstripped
+	'--standalone', '--static-libpython=no', '--lto=yes'
+]
+entry = 'main.py'						# the entry py code for nuitka to compile
+report = 'nuitka-report.xml'			# nuitka build report, save to the output directory
+plugins = ['upx']						# enabled plugin list, check with `nuitka --plugin-list`
+nofollow = ['google', 'matplotlib']		# module to exclude compile
+module_copy = ['google']				# module to copy from venv
+module_extra = []						# include extra module
+exclude_copy = ['*.pyi', '*.pyc']		# patterns to exclude files for copy
+## build time: about 2min/4min with or without numpy, to exclude numpy from compile, use this:
+#nofollow = ['google', 'matplotlib', 'numpy']
+#module_copy = ['google', 'numpy', 'numpy.libs']
+#module_extra = ['unittest']
+
+[tool.hatch.build.targets.sdist]
+only-include = ["protocol_adapter/", "test/", 'config/', 'main.py']
+artifacts = [
+	"protocol_adapter/version.py",
+	"protocol_adapter/protobuf_wrapper/main_pb2.py",
+	"protocol_adapter/protobuf_wrapper/main_pb2.pyi",
+	"protocol_adapter/protobuf_wrapper/monitor_pb2.py",
+	"protocol_adapter/protobuf_wrapper/monitor_pb2.pyi",
+]
+
+[tool.hatch.build.targets.wheel]
+only-include = ["protocol_adapter/", "test/", 'config/', 'main.py']
+artifacts = [
+	"protocol_adapter/version.py",
+	"protocol_adapter/protobuf_wrapper/main_pb2.py",
+	"protocol_adapter/protobuf_wrapper/main_pb2.pyi",
+	"protocol_adapter/protobuf_wrapper/monitor_pb2.py",
+	"protocol_adapter/protobuf_wrapper/monitor_pb2.pyi",
+]
+
+
+[tool.uv]
+package = true
+default-groups = ["dev"]
+
+
+[tool.ruff]
+indent-width = 4
+line-length = 100
+
+[tool.ruff.lint]
+## ref: https://docs.astral.sh/ruff/rules/
+select = [
+	"E",		# pycodestyle Error
+	"W",		# pycodestyle Warning
+	"I",		# isort
+	"F",		# Pyflakes
+	"A",		# flake8-builtins
+	"B",		# flake8-bugbear
+	"C4",		# flake8-comprehensions
+	"COM",		# flake8-commas
+	"SIM",		# flake8-simplify
+	"FBT",		# flake8-boolean-trap
+	"PTH",		# flake8-use-pathlib
+	"ASYNC",	# flake8-async
+	"PERF",		# Perflint
+	"FURB",		# refurb
+	"UP",		# pyupgrade
+	"PL",		# Pylint
+]
+ignore = [
+	"E266", 	# too many leading ‘#’ for block comment
+	"E731", 	# do not assign a lambda expression, use a def
+	"I001", 	# Import block is un-sorted or un-formatted
+	"COM812",	# Trailing comma missing
+	"SIM905",	# split-static-string
+]
+
+[tool.ruff.format]
+quote-style = "single"
+line-ending = "lf"
+
+# tuna 经常 403, ip 上黑名单了? ustc 稍微好一点点
+#
+# [[tool.uv.index]]
+# name = "tuna"
+# url = "https://pypi.tuna.tsinghua.edu.cn/simple"
+#
+# [[tool.uv.index]]
+# name = "ustc"
+# url = "https://pypi.mirrors.ustc.edu.cn/simple"

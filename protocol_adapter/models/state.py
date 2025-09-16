@@ -1,0 +1,49 @@
+from enum import Enum
+
+
+class SystemState(Enum):
+    NONE = 0
+    IDLE = 0x1  # 空闲
+    TASK_FINISH = 0x2  # 任务完成
+    BUSY = 0x3  # 正在执行控制指令
+    ARC_MOVE = 0x4  # 弧线运动中
+    EXECUTE_ACTION = 0x5  # 正在执行动作，举升或放下
+    AUTO_ADJUST = 0x6  # 设备自主调整中
+    CHARGING = 0x7  # 正在充电
+    CHARGE_FULL = 0x8  # 充电完成维护
+    LOAD_UNLOAD_OK = 0xB
+    OBA_AHEAD = 0x41  # 前方避障
+    OBA_BEHIND = 0x42  # 后方避障
+    OBA_LEFT = 0x43  # 左方避障
+    OBA_RIGHT = 0x44  # 右方避障
+    ARC_OAB_AHEAD = 0x45  # 弧线运动时前方避障
+    PAUSE = 0x81  # 暂停
+    ERROR = 0x82  # 设备异常、急停等
+    NAV_OFF_PATH = 0x83  # 偏离导航路径
+    RCS_CMD_ERROR = 0xC1  # 平台指令错误
+    TASK_WRONG_ANGLE = 0x343  # 任务角度异常
+    SCAN_ERROR = 0x101  # 扫不到二维码
+    SHELF_SN_ERROR = 0x102  # 货码不匹配
+    RAISE_PUT_ERROR = 0x103  # 举升异常
+    SHELF_ANGLE_ERROR = 0x104  # 货架角度偏移过大
+    SHELF_OFFSET_ERROR = 0x105  # 货架位置偏移过大
+    CHARGE_NO_CONN = 0x143  # 充电桩未连接
+    LOCATE_FAILED = 0x180  # SLAM定位失败
+    ROLL_RUNNING = 0xC  # 辊筒控制中
+    ROLL_FAILED = 0x2C2  # 对接滚动失败 (706)
+    ROLL_INVALID_CMD = 0x2C3  # 传动指令错误（有料箱发"接"，无料箱发"送"等） (707)
+    ROLL_OUT_OF_TIME = 0x2C4  # 传动超时 (708)
+    ROLL_BOX_NUM_NOT_MATCH = 0x2C5  # 料箱个数不匹配
+    CALIB_CTRLING = 0x2C6  # 对接微调中
+    CALIB_FAILED = 0x2C7  # 对接微调失败
+    WORKING_BE_CAREFUL = 0x2C8  # AGV作业中
+    WAIT_RESET_ACTIVE = 0x2C9  # 等待复位按钮确认
+    WORK_ACTION_FAIL = 0x2CA  # 动作执行失败 (714)
+    POD_CODE_CALIB_FAIL = 0x2CB  # 货架二维码标定失败
+    ROLL_FLEX_FAIL = 0x2CC  # 伸缩动作执行失败
+    ROLL_PIO_COMM_FAIL = 0x2CD  # 滚筒PIO通信对接失败 (717)
+    MANUAL_CONTROL = 0x2C0  # 手动控制中 (如触控屏, matrix, ..)
+    LOCK_SPACE_FAILED_BEFORE_RAISE = 0x300  # 区域锁定失败，设备执行举升货架前
+    LOCK_SPACE_FAILED_TEMP = 0x301  # 旋转申请空间锁定暂时失败
+    LOCK_SPACE_FAILED_PERMANENT = 0x302  # 旋转申请空间锁定永久失败
+    WAIT_RELEASE = 0x500

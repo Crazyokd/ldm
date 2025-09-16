@@ -1,0 +1,82 @@
+= 协议适配器
+
+用于接入不同调度，进行协议转换。当前针对华为 LDM 协议进行适配
+
+== 使用
+
+依赖管理使用 https://docs.astral.sh/uv[uv]，安装方式:
+
+	curl -LsSf https://astral.sh/uv/install.sh | sh
+
+
+- 运行程序
+
+[source,bash]
+----
+# 选择目标 python 版本
+uv venv -p 3.14
+
+# 初始化虚拟环境，安装依赖
+uv sync --all-extras
+
+# 构建打包(含依赖文件生成)
+uv build -o out/
+
+# 运行
+uv run ./main.py
+----
+
+- 二进制打包
+
+二进制打包涉及 `upx` 外部依赖，用于压缩二进制文件
+
+[source,bash]
+----
+make venv
+make build
+make binary
+----
+
+NOTE: 后续开发中如果遇到 `uv build` 失败，可先运行 `uv sync --all-extras` 后重试
+
+
+== 二进制打包
+
+目前使用 `nuitka` 将源文件打包成二进制，实现环境依赖内置，可独立模块化更新。
+如果有安装 `ccache` 将默认启用 `ccache` 编译缓存。
+
+涉及构建说明：
+
+. `protobuf` 依赖加入编译后，启动时出现 `SIGSEGV`, 整体排除 `google` 模块
+. `numpy` 和 `matplotlib` 编译耗时较久，考虑直接使用 `venv` 中的包目录
+. `numpy` 内部动态导入 `unittest` ，如果排除编译后，需显式加入 `unittest` 模块
+. `matplotlib` 当前仅在测试绘图时动态导入，不需要加入编译
+
+目前使用 `standalone` 模式打包，产物为单目录(内置所有依赖)，无须运行环境安装 `python` 。
+也可打包成单文件(`onefile`)，但启动速度会慢一点(启动时自动解压缩)，最主要的是不利于动态
+链接库共享。
+
+`nuitka` 相关包编译排除的定制可在 `pyproject.toml` 中 `[tool.hatch.build.hooks.custom.nuitka]`
+下配置，相见相关注释说明，目前默认内嵌编译 numpy, 整体打包时间大概 6min 左右
+
+NOTE: `uv` 安装的 `python` 静态链接/动态连接 时可能出现链接问题，暂未解决
+
+
+== 仿真测试
+
+当前使用 `pytest` , 支持基于 `unittest` 编写的既有测试用例。
+
+[source,bash]
+----
+# 扫描列出全部测试项
+pytest --collect-only test/
+
+# 检测运行目录下的全部测试(如需打印输出可添加 `-s` 参数)
+pytest test/
+
+# 运行指定文件内的全部测试用例，并打印输出
+pytest -s test/unloaded_base_test.py
+
+# 运行指定测试，并打印输出
+pytest -s test/unloaded_base_test.py::UnloadedBaseTest::test_move_forward
+----
